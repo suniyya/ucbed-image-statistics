@@ -1,0 +1,33 @@
+function [coords, diff_image] = calculate_statistics(grasp_mvt, avg_by, sqImgLen)
+    % Input:
+    % @grasp_mvt: a movie - dim m x n x 80 frames
+    % @avg_by: the block averaging factor (int)
+    % crop then take a difference image by
+    % taking average of first few and last few frames and subtracting 
+    % downsample by block averaging
+    % then binarize (mean-binarize)
+    % Output: 10-dimensional texture statistics -> can ignore first dim as
+
+    centerX = 512;
+    centerY = 512;
+    frameRate = 20; % change if nFrames is NOT 80, with 20fps
+    start_window = 0.5; % in seconds
+    end_window = 1; % in seconds
+
+    % crop the image to zoom into the center, for max motion without noise
+    grasp_mvt = crop(grasp_mvt, centerX, centerY, sqImgLen);
+    % take the difference between the mean start and end states
+    startPos = mean(grasp_mvt(:, :, 1:start_window*frameRate), 4);
+    endPos = mean( ...
+        grasp_mvt(:, :, end-end_window*frameRate:end), 3 ...
+        );
+    diff_image = endPos - startPos;
+    % downsample image
+    diff_image = blockAverage(diff_image, avg_by);
+    % mean binarize to turn to black and white
+    diff_image = diff_image < mean(diff_image(:));
+
+    counts=btc_map2counts(diff_image);
+    corrs=getcorrs_p2x2(counts/sum(counts(:)));
+    coords=btc_corrs2vec(corrs);
+end
