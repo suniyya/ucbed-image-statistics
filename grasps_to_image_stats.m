@@ -1,4 +1,4 @@
-function [image_stats, graspname, limb] = grasps_to_image_stats(path_to_ss, grasp, arm, avg_by, sqImgLen)
+function [image_stats, graspname, limb] = grasps_to_image_stats(path_to_ss, grasp, arm, avg_by, sqImgLen, image_type)
     % Computes image statistics for all repeats of a given grasp for an arm 
     %   Detailed explanation goes here
     % read all files for a given grasp and arm. 
@@ -45,7 +45,7 @@ function [image_stats, graspname, limb] = grasps_to_image_stats(path_to_ss, gras
         grasp_mvt = mvts(i);
         data = strcat('dataMatrix', arm);
         [x, y, t] = size(grasp_mvt{1}.(data));
-        [coords, diff_img] = calculate_statistics(grasp_mvt{1}.(data), avg_by, sqImgLen);
+        [coords, diff_img] = calculate_statistics(grasp_mvt{1}.(data), avg_by, sqImgLen, image_type);
         image_stats(i, :) = coords;
     end
     graspname = repmat(grasp, n_files, 1);
